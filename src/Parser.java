@@ -1,5 +1,3 @@
-// package Data
-
 public class Parser {
     public static NobelPrizeAward parseNobelWinner(String[] data) {
         int year = Integer.parseInt(data[0]);

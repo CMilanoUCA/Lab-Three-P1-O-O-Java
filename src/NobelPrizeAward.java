@@ -1,5 +1,3 @@
-//package Data;
-
 public record NobelPrizeAward(int year, String category,
                               String[] winners, int numWinners) {
 
