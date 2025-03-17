@@ -7,6 +7,8 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.RowFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.*;
@@ -16,7 +18,7 @@ public class DataViewer {
     // GUI Definitions
     private JTable table;
     private JFrame frame;
-    private JPanel panel;
+    private JPanel mainPanel;
     // Sorter Definition
     private TableRowSorter<TableModel> sorter;
     // Filter Definitions
@@ -24,16 +26,23 @@ public class DataViewer {
     private JCheckBox noWinnersFilterCheckbox;
     private JCheckBox pre2000FilterCheckbox;
     private JCheckBox post2000FilterCheckbox;
+    // Details Definitions
+    private JPanel detailsPanel;
+    private JLabel yearLabel, categoryLabel, winnersLabel, numWinnersLabel;
 
     public DataViewer(Object[][] data, String[] columnNames) {
         // Set up JFrame
         frame = new JFrame("Nobel Prize Winner Table");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // Show 30 Rows if not FS
-        frame.setSize(950, 600);
+        frame.setSize(1000, 600);
 
-        // Set up JPanel
-        panel = new JPanel(new BorderLayout());
+        // Set up mainPanel
+        mainPanel = new JPanel(new BorderLayout());
+
+        // Create tablePanel for Table
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Set up JTable with columns and data
         table = new JTable(data, columnNames) {
@@ -79,12 +88,13 @@ public class DataViewer {
             return joined1.compareTo(joined2);
         });
 
-        // Add table to JScrollPane, JScrollPane to panel
+        // Add table to JScrollPane, JScrollPane to tablePanel
         JScrollPane pane = new JScrollPane(table);
-        panel.add(pane, BorderLayout.CENTER);
+        pane.setPreferredSize(new Dimension(600, 200));
+        tablePanel.add(pane, BorderLayout.CENTER);
 
         // Add Filter CBs
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel filterPanel = new JPanel(new GridLayout(2, 2, 5, 5));
         onlyWinnersFilterCheckbox = new JCheckBox("Show Only Winners");
         noWinnersFilterCheckbox = new JCheckBox("Show No Winners");
         pre2000FilterCheckbox = new JCheckBox("Show Post-2000 Winners");
@@ -102,11 +112,42 @@ public class DataViewer {
         filterPanel.add(pre2000FilterCheckbox);
         filterPanel.add(post2000FilterCheckbox);
 
-        // Add filterPanel to JPanel
-        panel.add(filterPanel, BorderLayout.NORTH);
+        // Add filterPanel to tablePanel
+        tablePanel.add(filterPanel, BorderLayout.NORTH);
+
+        // Add tablePanel to mainPanel
+        mainPanel.add(tablePanel, BorderLayout.CENTER);
+
+        // Create details panel
+        detailsPanel = new JPanel(new GridLayout(4, 1, 5, 5)); // 4 rows, 1 column, with spacing
+        detailsPanel.setBorder(BorderFactory.createTitledBorder("Selected Row Details"));
+        detailsPanel.setPreferredSize(new Dimension(750, 100)); // Set preferred size for the details panel
+
+        // Initialize labels for details
+        yearLabel = new JLabel("Year: ");
+        categoryLabel = new JLabel("Category: ");
+        winnersLabel = new JLabel("Winner(s): ");
+        numWinnersLabel = new JLabel("# of Winners: ");
+
+        // Add labels to details panel
+        detailsPanel.add(yearLabel);
+        detailsPanel.add(categoryLabel);
+        detailsPanel.add(winnersLabel);
+        detailsPanel.add(numWinnersLabel);
+
+        // Add detailsPanel to mainPanel below Table
+        mainPanel.add(detailsPanel, BorderLayout.SOUTH);
+
+        // Let Mouse react to Table Row being selected
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                updateDetailsPanel();
+            }
+        });
 
         // Add JPanel and Display JFrame
-        frame.add(panel);
+        frame.add(mainPanel);
         frame.setVisible(true);
     }
 
@@ -122,7 +163,7 @@ public class DataViewer {
         column.setPreferredWidth(150);
         // 3rd Column (Winner(s))
         column = table.getColumnModel().getColumn(2);
-        column.setPreferredWidth(650);
+        column.setPreferredWidth(300);
         // 4th Column (# of Winners)
         column = table.getColumnModel().getColumn(3);
         column.setPreferredWidth(75);
@@ -191,6 +232,24 @@ public class DataViewer {
         };
     }
 
+    // Update detailsPanel w/selected Table Row data
+    private void updateDetailsPanel() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow >= 0) {
+            // Get data from selected Table Row
+            int year = (int) table.getValueAt(selectedRow, 0);
+            String category = (String) table.getValueAt(selectedRow, 1);
+            String[] winners = (String[]) table.getValueAt(selectedRow, 2);
+            int numWinners = (int) table.getValueAt(selectedRow, 3);
+
+            // Update labels w/selected Table Row data
+            yearLabel.setText("Year: " + year);
+            categoryLabel.setText("Category: " + category);
+            winnersLabel.setText("Winner(s): " + String.join(", ", winners));
+            numWinnersLabel.setText("# of Winners: " + numWinners);
+        }
+    }
+
     // GETTERS BELOW
     public JTable getTable() {
         return table;
@@ -200,7 +259,7 @@ public class DataViewer {
         return frame;
     }
 
-    public JPanel getPanel() {
-        return panel;
+    public JPanel getMainPanel() {
+        return mainPanel;
     }
 }
