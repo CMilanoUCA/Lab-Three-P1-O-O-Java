@@ -1,5 +1,5 @@
 // Carson Milano
-// Lab 3 PT. 1 (Data Display (Console Ver.))
+// Lab 3 (Data Display)
 
 import java.io.IOException;
 

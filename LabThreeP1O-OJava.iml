@@ -7,5 +7,19 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../jfreechart-1.5.2/src/main/java" />
+          <root url="file://$MODULE_DIR$/../jfreechart-1.5.2/src/test/java" />
+        </SOURCES>
+        <excluded>
+          <root url="file://$MODULE_DIR$/../jfreechart-1.5.2/src/test/java" />
+        </excluded>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="guicedee.services.jfreechart" level="project" />
   </component>
 </module>

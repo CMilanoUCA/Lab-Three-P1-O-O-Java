@@ -1,12 +1,16 @@
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 
 public class DataViewer {
     private JTable table;
     private JFrame frame;
     private JPanel panel;
+    private TableRowSorter<TableModel> sorter;
 
     public DataViewer(Object[][] data, String[] columnNames) {
         // Set up JFrame
@@ -49,6 +53,18 @@ public class DataViewer {
 
         // Set Column Width
         setColumnWidth();
+
+        // Enable Sorting
+        sorter = new TableRowSorter<>(table.getModel());
+        table.setRowSorter(sorter);
+        // Override Comparator to Sort Winners
+        sorter.setComparator(2, (o1, o2) -> {
+            String[] winners1 = (String[]) o1;
+            String[] winners2 = (String[]) o2;
+            String joined1 = String.join(", ", winners1);
+            String joined2 = String.join(", ", winners2);
+            return joined1.compareTo(joined2);
+        });
 
         // Add table to JScrollPane, JScrollPane to panel
         JScrollPane pane = new JScrollPane(table);
