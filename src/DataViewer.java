@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.jfree.chart.JFreeChart;
 import java.awt.*;
 
 public class DataViewer {
@@ -32,6 +33,8 @@ public class DataViewer {
     // Stats Definitions
     private JPanel statsPanel;
     private JLabel avgWinnersLabel, totalWinnersLabel, yearsTrackedLabel;
+    //
+    private JFreeChart chart;
 
     public DataViewer(Object[][] data, String[] columnNames) {
         initializeFrame();
