@@ -4,23 +4,24 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.RowFilter;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.jfree.chart.JFreeChart;
+import java.util.*;
 import java.awt.*;
+import java.util.List;
 
 public class DataViewer {
     // GUI Definitions
     private JTable table;
     private JFrame frame;
     private JPanel mainPanel;
-    // Sorting Definitions
+    // Sorting Definition
     private TableRowSorter<TableModel> sorter;
     // Filtering Definitions
     private JCheckBox onlyWinnersFilterCheckbox;
@@ -33,8 +34,9 @@ public class DataViewer {
     // Stats Definitions
     private JPanel statsPanel;
     private JLabel avgWinnersLabel, totalWinnersLabel, yearsTrackedLabel;
-    //
-    private JFreeChart chart;
+    // Chart Definitions
+    private JFreeChart pieChart;
+    private ChartPanel chartPanel;
 
     public DataViewer(Object[][] data, String[] columnNames) {
         initializeFrame();
@@ -43,6 +45,7 @@ public class DataViewer {
         initializeFilters();
         initializeDetailsPanel();
         initializeStatsPanel();
+        initializeChart();
         setupListeners();
         frame.setVisible(true);
     }
@@ -51,7 +54,7 @@ public class DataViewer {
     private void initializeFrame() {
         frame = new JFrame("Nobel Prize Winner Display");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 600);
+        frame.setSize(1200, 700);
     }
 
     // Initialize mainPanel
@@ -169,6 +172,50 @@ public class DataViewer {
         ((JPanel) mainPanel.getComponent(1)).add(statsPanel);
     }
 
+    // Initialize pieChart
+    private void initializeChart() {
+        // Create dataset for pieChart
+        DefaultPieDataset dataset = createPieDataset();
+
+        // Create visible pieChart
+        pieChart = ChartFactory.createPieChart(
+                "Spread of # of Winners in Table", // Title
+                dataset, // Dataset
+                true, // Include Legend
+                true, // Include Tooltips
+                false // No URLs
+        );
+
+        // Wrap pieChart into chartPanel
+        chartPanel = new ChartPanel(pieChart);
+        chartPanel.setPreferredSize(new Dimension(400, 300));
+
+        // Add chartPanel to mainPanel
+        JPanel chartContainer = new JPanel(new BorderLayout());
+        chartContainer.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        chartContainer.add(chartPanel, BorderLayout.CENTER);
+        mainPanel.add(chartContainer, BorderLayout.EAST);
+    }
+
+    // Create dataset for pieChart
+    private DefaultPieDataset createPieDataset() {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+
+        // Count # of Winners per Table Row
+        Map<Integer, Integer> winnerCounts = new HashMap<>();
+        for (int i = 0; i < table.getRowCount(); i++) {
+            int numWinners = (int) table.getValueAt(i, 3);
+            winnerCounts.put(numWinners, winnerCounts.getOrDefault(numWinners, 0) + 1);
+        }
+
+        // Add data to pieChart dataset
+        for (Map.Entry<Integer, Integer> entry : winnerCounts.entrySet()) {
+            dataset.setValue(entry.getKey() + " Winner(s)", entry.getValue());
+        }
+
+        return dataset;
+    }
+
     // Let Mouse react to Table Row being selected
     private void setupListeners() {
         table.addMouseListener(new MouseAdapter() {
@@ -178,7 +225,7 @@ public class DataViewer {
             }
         });
 
-        // Update statsPanel
+        // Update statsPanel for selected Table Row
         updateStatsPanel();
     }
 
@@ -214,10 +261,13 @@ public class DataViewer {
                 filters.add(removePost2000Filter());
             }
 
+            // andFilter allows for multiple Filters to be active
             RowFilter<TableModel, Integer> combinedFilter = RowFilter.andFilter(filters);
             sorter.setRowFilter(combinedFilter);
 
+            // Updates statsPanel + Chart to match Filters
             updateStatsPanel();
+            updateChart();
         }
     }
 
@@ -290,6 +340,13 @@ public class DataViewer {
         totalWinnersLabel.setText("Total # of Winners: " + totalWinners);
         yearsTrackedLabel.setText("# of Years Tracked: " + uniqueYears.size());
     }
+
+    // Update dataset in pieChart
+    private void updateChart() {
+        DefaultPieDataset dataset = createPieDataset();
+        ((org.jfree.chart.plot.PiePlot) pieChart.getPlot()).setDataset(dataset);
+    }
+
 
     // GETTERS BELOW
     public JTable getTable() {

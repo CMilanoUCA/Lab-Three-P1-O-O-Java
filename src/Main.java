@@ -35,8 +35,3 @@ public class Main {
         new DataViewer(data, columnNames);
     }
 }
-
-
-
-
-
